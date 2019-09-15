@@ -1,0 +1,91 @@
+import matplotlib.pyplot as plt
+from control.matlab import *
+import control as ctr
+
+TimeLine = []
+for i in range(0, 3000):
+    TimeLine.append(i)
+
+
+def n_w(num, den, name):
+    w = tf(num, den)
+    print('Передаточная функция {0} : \n {1}'.format(name, w))
+    return w
+
+
+def grafic_step(f, f2, name):
+    y1, x1 = ctr.step_response(f, TimeLine)
+    y2, x2 = ctr.step_response(f2, TimeLine)
+    plt.subplot(2, 1, 1)
+    plt.plot(x1, y1, "b", x2, y2, "r")
+    plt.title('Переходная функция {}'.format(name))
+    plt.ylabel('Амплитудное значение')
+    plt.xlabel('Время')
+    plt.grid(True)
+
+    y1, x1 = ctr.impulse_response(f, TimeLine)
+    y2, x2 = ctr.impulse_response(f2, TimeLine)
+    plt.subplot(2, 1, 2)
+    plt.plot(x1, y1, "b", x2, y2, "r")
+    plt.title('Импульсная функция {}'.format(name))
+    plt.ylabel('Амплитудное значение')
+    plt.xlabel('Время')
+    plt.grid(True)
+    plt.tight_layout(6, 2, 3)
+    plt.show()
+
+    mag, phase, omega = bode(f, f2, dB=False, Plot=True)
+    plt.title('ЛАЧХ и ЛАФЧХ {}'.format(name))
+    plt.show()
+
+
+def grafic2(fu1, fu2, name):
+    y1, x1 = step(fu1)
+    y2, x2 = step(fu2)
+    plt.subplot(2, 1, 1)
+    plt.plot(x1, y1, "b", x2, y2, "r")
+    plt.title('Переходная функция {}'.format(name))
+    plt.ylabel('Амплитудное значение')
+    plt.xlabel('Время')
+    plt.grid(True)
+
+    y1, x1 = impulse(fu1)
+    y2, x2 = impulse(fu2)
+    plt.subplot(2, 1, 2)
+    plt.plot(x1, y1, "b", x2, y2, "r")
+    plt.title('Импульсная функция {}'.format(name))
+    plt.ylabel('Амплитудное значение')
+    plt.xlabel('Время')
+    plt.grid(True)
+    plt.show()
+
+    mag, phase, omega = bode(fu1, fu2, dB=False, Plot=True)
+    plt.title('ЛАЧХ и ЛАФЧХ {}'.format(name))
+    plt.plot()
+    plt.show()
+
+
+name1 = 'Безынерционного звена'
+bz_z = n_w(num=3, den=1, name=name1)
+bz_z2 = n_w(num=6, den=1, name=name1)
+grafic_step(bz_z, bz_z2, name1)
+
+name2 = 'Апериодического звена'
+ap_z = n_w(num=5, den=[3, 1], name=name2)
+ap_z2 = n_w(num=10, den=[1.5, 1], name=name2)
+grafic2(ap_z, ap_z2, name2)
+
+name3 = 'Интегрирующего звена'
+in_z = n_w(num=3, den=[1, 0], name=name3)
+in_z2 = n_w(num=6, den=[1, 0], name=name3)
+grafic2(in_z, in_z2, name3)
+
+name4 = 'Идеального диф. звена'
+id_z = n_w(num=[1, 1e-12], den=[1e-13, 1], name=name4)
+id_z2 = n_w(num=[2, 1e-12], den=[1e-13, 1],  name=name4)
+grafic_step(id_z, id_z2, name4)
+
+name5 = 'Реального диф. звена'
+rD_z = n_w(num=[1, 0], den=[4, 1], name=name5)
+rD_z2 = n_w(num=[2, 0], den=[2, 1], name=name5)
+grafic2(rD_z, rD_z2, name5)
